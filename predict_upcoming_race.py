@@ -3,7 +3,6 @@ Pre-race finishing-order prediction tab — with prediction history log.
 """
 
 import streamlit as st
-import fastf1
 import pandas as pd
 import numpy as np
 import joblib
