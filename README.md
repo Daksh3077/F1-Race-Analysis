@@ -48,4 +48,3 @@ Shows a ranked finishing table, bar chart, and podium prediction cards
 
 Tech Stack
 
-ToolWhat it doesFastF1Downloads official F1 timing, telemetry, and results datascikit-learnGradient Boosting models for overtake probability + race predictionStreamlitThe entire frontend and deploymentPlotlyAll the interactive chartsPandas / NumPyData processing and feature engineeringJoblibModel serialization (.pkl files)
