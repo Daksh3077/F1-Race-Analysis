@@ -12,7 +12,7 @@ What is this?
 
 F1 Race Analytics is a personal project I built out of a mix of obsession with Formula 1 and wanting to actually apply machine learning to something I care about. It started as a race analysis tool, and I kept adding features until it could predict upcoming race results too.
 
-It pulls real F1 data using the FastF1 library, runs it through trained ML models, and serves everything through a clean Streamlit dashboard — dark themed, obviously.
+It pulls real F1 data using the OpenF1 API, runs it through trained ML models, and serves everything through a clean Streamlit dashboard — dark themed, obviously.
 
 
 Features
