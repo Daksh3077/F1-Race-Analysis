@@ -86,26 +86,48 @@ def load_historical_features():
 
 @st.cache_data(show_spinner=False)
 def get_next_event(year):
-    schedule = fastf1.get_event_schedule(year, include_testing=False)
-    schedule = schedule[schedule["EventFormat"] != "testing"]
-    today    = pd.Timestamp.now().normalize()
-    upcoming = schedule[schedule["EventDate"].dt.normalize() >= today]
-    if upcoming.empty:
+    import requests
+    try:
+        resp = requests.get(
+            f"https://api.jolpi.ca/ergast/f1/{year}.json",
+            timeout=15
+        )
+        races = resp.json()["MRData"]["RaceTable"]["Races"]
+        today = pd.Timestamp.now().normalize()
+        for race in races:
+            race_date = pd.Timestamp(race["date"]).normalize()
+            if race_date >= today:
+                return {
+                    "EventName":   race["raceName"],
+                    "RoundNumber": int(race["round"]),
+                    "EventDate":   race["date"],
+                }
         return None
-    return upcoming.sort_values("EventDate").iloc[0]
+    except Exception as e:
+        st.error(f"Could not fetch race calendar: {e}")
+        return None
 
 
 def try_get_grid(year, rnd):
+    import requests
     try:
-        q = fastf1.get_session(year, rnd, "Q")
-        q.load(laps=False, telemetry=False, weather=False, messages=False)
-        res = q.results[["Abbreviation", "TeamName", "Position"]].copy()
-        res = res.rename(columns={"Position": "GridPosition"})
-        res = res.dropna(subset=["Abbreviation"])
-        return res if not res.empty else None
+        resp = requests.get(
+            f"https://api.jolpi.ca/ergast/f1/{year}/{rnd}/qualifying.json",
+            timeout=15
+        )
+        results = resp.json()["MRData"]["QualifyingTable"]["Races"]
+        if not results:
+            return None
+        rows = []
+        for r in results[0]["QualifyingResults"]:
+            rows.append({
+                "Abbreviation":  r["Driver"]["code"],
+                "TeamName":      r["Constructor"]["name"],
+                "GridPosition":  int(r["position"]),
+            })
+        return pd.DataFrame(rows) if rows else None
     except Exception:
         return None
-
 
 def _latest_stat(hist_df, key_col, key_val, col):
     if col not in hist_df.columns or key_col not in hist_df.columns:
